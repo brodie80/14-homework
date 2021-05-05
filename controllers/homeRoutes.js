@@ -1,11 +1,11 @@
 const router = require('express').Router();
-const { blog, User } = require('models/index.js');
+const { Blog, User } = require('../models/index.js');
 const withAuth = require('../utils/auth');
 
 router.get('/', async (req, res) => {
   try {
     // Get all blogs and JOIN with user data
-    const blogData = await blog.findAll({
+    const blogData = await Blog.findAll({
       include: [
         {
           model: User,
@@ -38,10 +38,10 @@ router.get('/blog/:id', async (req, res) => {
       ],
     });
 
-    const blog = blogData.get({ plain: true });
+    const blogs = blogData.get({ plain: true });
 
     res.render('blog', {
-      ...blog,
+      ...blogs,
       logged_in: req.session.logged_in
     });
   } catch (err) {
@@ -53,9 +53,9 @@ router.get('/blog/:id', async (req, res) => {
 router.get('/profile', withAuth, async (req, res) => {
   try {
     // Find the logged in user based on the session ID
-    const userData = await User.usrfind(req.session.user_id, {
+    const userData = await User.findByPk(req.session.user_id, {
       attributes: { exclude: ['password'] },
-      include: [{ model: blog }],
+      include: [{ model: Blog }],
     });
 
     const user = userData.get({ plain: true });
